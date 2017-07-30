@@ -6,6 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.StrictMode;
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -129,24 +133,80 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public List<ContentValues> getAllContacts(){
+
         List<ContentValues> contactList = new ArrayList<ContentValues>();
+        JSONArray jarray=null;
 
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query(TABLE_CONTACTS, null, null, null, null, null, KEY_ID + " DESC ");
 
-        // looping through all rows and adding to list
-        if (cursor.moveToFirst()) {
-            do {
-                ContentValues contact = new ContentValues();
-                contact.put("contact_id", Integer.parseInt(cursor.getString(0)));
-                contact.put("contact_name", cursor.getString(1));
-                contact.put("contact_number", cursor.getString(2));
-                // Adding contact to list
-                contactList.add(contact);
-            } while (cursor.moveToNext());
+        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+        if (SDK_INT > 8)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            //your codes here
+
+            try{
+
+                String link="http://savingsplus.srishops.info/getAll.php";
+
+                URL url = new URL(link);
+                URLConnection conn = url.openConnection();
+
+                conn.setDoOutput(true);
+
+                BufferedReader reader = new BufferedReader(new
+                        InputStreamReader(conn.getInputStream()));
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                // Read Server Response
+                while((line = reader.readLine()) != null) {
+                    sb.append(line);
+                    break;
+                }
+
+                System.out.println(sb.toString());
+
+                String json = sb.toString();
+
+                try {
+
+                    jarray = new JSONArray(json);
+
+                    Log.d("Savings plus", jarray.toString());
+
+                } catch (Throwable t) {
+                    Log.e("Savings Plus", "Could not parse malformed JSON: \"" + json + "\"");
+                }
+
+            } catch(Exception e){
+                //  return new String("Exception: " + e.getMessage());
+                e.printStackTrace();
+
+                Log.e("Savings Plus", "Error while connecting to server");
+
+            }
+
         }
 
-        // return contact list
+        if (jarray != null) {
+            for (int i=0;i<jarray.length();i++){
+
+                ContentValues cvalues = new ContentValues();
+
+                try {
+                    cvalues.put("contact_name",jarray.getJSONObject(i).getString("name"));
+                    cvalues.put("contact_number",jarray.getJSONObject(i).getString("saving"));
+                    cvalues.put("contact_id",Integer.parseInt(jarray.getJSONObject(i).getString("id")));
+                    contactList.add(cvalues);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
         return contactList;
     }
 
