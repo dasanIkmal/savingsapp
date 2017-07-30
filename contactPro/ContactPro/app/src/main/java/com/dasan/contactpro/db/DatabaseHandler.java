@@ -242,25 +242,81 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Getting Single Contacts
     public ContentValues getContact(String contactId) {
         ContentValues contact = new ContentValues();
-        String args[] = null;
-        String whereClause = null;
-        args = new String[1];
-        args[0] = contactId;
-        whereClause = KEY_ID + "=?";
+        JSONArray jsonarray = null;
 
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query(TABLE_CONTACTS, null, whereClause, args, null, null, null);
 
-        // looping through all rows and adding to list
-        if (cursor.moveToFirst()) {
-            do {
 
-                contact.put("contact_id", Integer.parseInt(cursor.getString(0)));
-                contact.put("contact_name", cursor.getString(1));
-                contact.put("contact_number", cursor.getString(2));
-                // Adding contact to list
-            } while (cursor.moveToNext());
+        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+        if (SDK_INT > 8)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            //your codes here
+
+            try{
+
+                String link="http://savingsplus.srishops.info/single.php";
+                String data  = URLEncoder.encode("id", "UTF-8") + "=" +
+                        URLEncoder.encode(contactId, "UTF-8");
+
+                URL url = new URL(link);
+                URLConnection conn = url.openConnection();
+
+                conn.setDoOutput(true);
+                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+
+                wr.write( data );
+                wr.flush();
+
+                BufferedReader reader = new BufferedReader(new
+                        InputStreamReader(conn.getInputStream()));
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                // Read Server Response
+                while((line = reader.readLine()) != null) {
+                    sb.append(line);
+                    break;
+                }
+
+                System.out.println(sb.toString());
+
+                String json = sb.toString();
+
+                try {
+
+                 jsonarray = new JSONArray(json);
+                    Log.d("Savings plus", jsonarray.toString());
+
+                } catch (Throwable t) {
+                    Log.e("Savings Plus", "Could not parse malformed JSON: \"" + json + "\"");
+                }
+            } catch(Exception e){
+                //  return new String("Exception: " + e.getMessage());
+                e.printStackTrace();
+            }
+
         }
+
+
+
+        if (jsonarray != null) {
+
+
+
+                try {
+                    contact.put("contact_name",jsonarray.getJSONObject(0).getString("name"));
+                    contact.put("contact_number",jsonarray.getJSONObject(0).getString("saving"));
+                    contact.put("contact_id",Integer.parseInt(jsonarray.getJSONObject(0).getString("id")));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+        }
+
 
         // return contact list
         return contact;
@@ -269,24 +325,110 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Updating single contact
     public void updateContact(ContentValues contact, String contact_id) {
-        SQLiteDatabase db = this.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(KEY_NAME, contact.getAsString("contact_name")); // Contact Name
-        values.put(KEY_PH_NO, contact.getAsString("contact_number")); // Contact Phone
 
-        // updating row
-        db.update(TABLE_CONTACTS, values, KEY_ID + " = ?",
-                new String[]{String.valueOf(contact_id)});
+
+        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+        if (SDK_INT > 8)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            //your codes here
+
+            try{
+
+                String link="http://savingsplus.srishops.info/update.php";
+                String data  = URLEncoder.encode("saving_name", "UTF-8") + "=" +
+                        URLEncoder.encode(contact.getAsString("contact_name"), "UTF-8");
+                data += "&" + URLEncoder.encode("saving", "UTF-8") + "=" +
+                        URLEncoder.encode(contact.getAsString("contact_number"), "UTF-8");
+
+                data += "&" + URLEncoder.encode("id", "UTF-8") + "=" +
+                        URLEncoder.encode(contact_id, "UTF-8");
+
+                URL url = new URL(link);
+                URLConnection conn = url.openConnection();
+
+                conn.setDoOutput(true);
+                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+
+                wr.write( data );
+                wr.flush();
+
+                BufferedReader reader = new BufferedReader(new
+                        InputStreamReader(conn.getInputStream()));
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                // Read Server Response
+                while((line = reader.readLine()) != null) {
+                    sb.append(line);
+                    break;
+                }
+
+                System.out.println(sb.toString());
+            } catch(Exception e){
+                //  return new String("Exception: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+        }
+
+
+
+
+
     }
 
 
     // Deleting single contact
     public void deleteContact(String contact_id) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_CONTACTS, KEY_ID + " = ?",
-                new String[]{String.valueOf(contact_id)});
-        db.close();
+
+
+        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+        if (SDK_INT > 8)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            //your codes here
+
+            try{
+
+                String link="http://savingsplus.srishops.info/delete.php";
+                String data  = URLEncoder.encode("id", "UTF-8") + "=" +
+                        URLEncoder.encode(contact_id, "UTF-8");
+
+                URL url = new URL(link);
+                URLConnection conn = url.openConnection();
+
+                conn.setDoOutput(true);
+                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+
+                wr.write( data );
+                wr.flush();
+
+                BufferedReader reader = new BufferedReader(new
+                        InputStreamReader(conn.getInputStream()));
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                // Read Server Response
+                while((line = reader.readLine()) != null) {
+                    sb.append(line);
+                    break;
+                }
+
+                System.out.println(sb.toString());
+            } catch(Exception e){
+                //  return new String("Exception: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+        }
     }
 
     public void deleteallContact() {
