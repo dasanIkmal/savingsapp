@@ -118,16 +118,44 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Getting All Contacts
     public double getSavings() {
         double savings =0;
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query(TABLE_CONTACTS, null, null, null, null, null, KEY_ID + " DESC ");
 
-        // looping through all rows and adding to list
-        if (cursor.moveToFirst()) {
-            do {
-                savings += Double.parseDouble(cursor.getString(2));
-            } while (cursor.moveToNext());
+
+        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+        if (SDK_INT > 8)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            //your codes here
+
+            try{
+
+                String link="http://savingsplus.srishops.info/sum.php";
+
+                URL url = new URL(link);
+                URLConnection conn = url.openConnection();
+
+                conn.setDoOutput(true);
+                BufferedReader reader = new BufferedReader(new
+                        InputStreamReader(conn.getInputStream()));
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                // Read Server Response
+                while((line = reader.readLine()) != null) {
+                    sb.append(line);
+                    break;
+                }
+
+                System.out.println(sb.toString());
+                savings = Double.parseDouble(sb.toString());
+            } catch(Exception e){
+                //  return new String("Exception: " + e.getMessage());
+                e.printStackTrace();
+            }
+
         }
-
 
         return savings;
     }
