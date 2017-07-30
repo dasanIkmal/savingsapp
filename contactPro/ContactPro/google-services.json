@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "732956280494",
+    "firebase_url": "https://contactpro-e3ca7.firebaseio.com",
+    "project_id": "contactpro-e3ca7",
+    "storage_bucket": "contactpro-e3ca7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732956280494:android:1c5b0a39050e98b2",
+        "android_client_info": {
+          "package_name": "com.dasan.contactpro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "732956280494-3s3otnglrenj2c9kiqj7g0mcihve4hep.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8qsaOk8Ly45XwufKo9l6ZsQR8pHaAPgc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

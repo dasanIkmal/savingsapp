@@ -5,7 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.StrictMode;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,15 +61,53 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Adding new contact
     public void addContact(ContentValues contact) {
-        SQLiteDatabase db = this.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(KEY_NAME, contact.getAsString("contact_name")); // Contact Name
-        values.put(KEY_PH_NO, contact.getAsString("contact_number")); // Contact Phone
 
-        // Inserting Row
-        db.insert(TABLE_CONTACTS, null, values);
-        db.close(); // Closing database connection
+        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+        if (SDK_INT > 8)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            //your codes here
+
+            try{
+
+                String link="http://savingsplus.srishops.info/insert.php";
+                String data  = URLEncoder.encode("saving_name", "UTF-8") + "=" +
+                        URLEncoder.encode(contact.getAsString("contact_name"), "UTF-8");
+                data += "&" + URLEncoder.encode("saving", "UTF-8") + "=" +
+                        URLEncoder.encode(contact.getAsString("contact_number"), "UTF-8");
+
+                URL url = new URL(link);
+                URLConnection conn = url.openConnection();
+
+                conn.setDoOutput(true);
+                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+
+                wr.write( data );
+                wr.flush();
+
+                BufferedReader reader = new BufferedReader(new
+                        InputStreamReader(conn.getInputStream()));
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                // Read Server Response
+                while((line = reader.readLine()) != null) {
+                    sb.append(line);
+                    break;
+                }
+
+                System.out.println(sb.toString());
+            } catch(Exception e){
+                //  return new String("Exception: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+        }
+
     }
 
 
